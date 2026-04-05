@@ -19,7 +19,7 @@ static const int STATE_NUMBER = 54432; // 상태의 총 개수 (9*6*9*7*4*4)
 static const int ENCOUNTER_NUMBER = 5; // 인카운터의 총 개수 (event, battle, shop, rebelion, boss)
 static const int ACTION_NUMBER = 3; // 행동의 총 개수 (최대 3개)
 
-static const int BOMB_MAINTENANCE_COST = 2; // 폭탄 유지 비용
+static const int BOMB_MAINTENANCE_COST = 1; // 폭탄 유지 비용
 static const int BOMB_POWER_BONUS = 5; // 폭탄 사용 시 파워 보너스
 static const int MAX_BOMB = 2; // 최대 폭탄 개수
 
@@ -53,7 +53,7 @@ public:
     virtual EncounterType type() const = 0;
     virtual int actionCount(const State& s) const = 0;
     virtual const char* actionName(int a) const = 0;
-    virtual void apply(State& s, int action, Rng& rng) const = 0;
+    virtual void apply(State& s, int action, Rng& rng, bool isTraining) const = 0;
 
 protected:
     static void clampAndCheck(State& s);
@@ -74,7 +74,7 @@ public:
     int actionCount(const State&) const override;
     const char* actionName(int a) const override;
 
-    void apply(State& s, int action, Rng& rng) const override;
+    void apply(State& s, int action, Rng& rng, bool isTraining) const override;
 };
 
 class BattleEncounter final : public Encounter {
@@ -83,7 +83,7 @@ public:
     int actionCount(const State&) const override;
     const char* actionName(int a) const override;
 
-    void apply(State& s, int action, Rng&) const override;
+    void apply(State& s, int action, Rng& rng, bool isTraining) const override;
 };
 
 class ShopEncounter final : public Encounter {
@@ -92,7 +92,7 @@ public:
     int actionCount(const State&) const override;
     const char* actionName(int a) const override;
 
-    void apply(State& s, int action, Rng&) const override;
+    void apply(State& s, int action, Rng& rng, bool isTraining) const override;
 };
 
 class RebelionEncounter final : public Encounter {
@@ -101,7 +101,7 @@ public:
     int actionCount(const State&) const override;
     const char* actionName(int a) const override;
 
-    void apply(State& s, int action, Rng&) const override;
+    void apply(State& s, int action, Rng& rng, bool isTraining) const override;
 };
 
 class BossEncounter final : public Encounter {
@@ -110,7 +110,7 @@ public:
     int actionCount(const State&) const override;
     const char* actionName(int a) const override;
 
-    void apply(State& s, int action, Rng&) const override;
+    void apply(State& s, int action, Rng& rng, bool isTraining) const override;
 };
 
 class agent {
@@ -135,7 +135,9 @@ class agent {
     // Q-table 크기: 54432(상태) * 5(인카운터) * 3(행동) = 816,480 float entries (약 3.1MB)
 
     public:
-    float qTable[STATE_NUMBER][ENCOUNTER_NUMBER][ACTION_NUMBER] = {0.0f};  // Q-table 
+    std::vector<float> qTable; // Q-table 
+    
+    agent();
 
     uint32_t seed = 42u;
     
@@ -146,4 +148,7 @@ class agent {
     int getEncounterIndex(const EncounterType& encounter) ;
     
     float maxQ(int stateIndex, int encounterIndex);
+
+    float& Q(int stateIndex, int encounterIndex, int actionIndex);
+    const float& Q(int stateIndex, int encounterIndex, int actionIndex) const;
 };

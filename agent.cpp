@@ -1,18 +1,40 @@
 #include "types.h"
 
-void agent::learn(const State& state, const EncounterType& encounter, int action, float reward, const State& nextState, const EncounterType& nextEncounter) 
+agent::agent()
+    : qTable(STATE_NUMBER * ENCOUNTER_NUMBER * ACTION_NUMBER, 0.0f) {}
+
+float& agent::Q(int stateIndex, int encounterIndex, int actionIndex)
+{
+    return qTable[
+        (stateIndex * ENCOUNTER_NUMBER + encounterIndex) * ACTION_NUMBER + actionIndex
+    ];
+}
+
+const float& agent::Q(int stateIndex, int encounterIndex, int actionIndex) const
+{
+    return qTable[
+        (stateIndex * ENCOUNTER_NUMBER + encounterIndex) * ACTION_NUMBER + actionIndex
+    ];
+}
+
+void agent::learn(const State& state, const EncounterType& encounter, int action,
+                  float reward, const State& nextState, const EncounterType& nextEncounter)
 {
     int stateIndex = getStateIndex(state);
     int nextStateIndex = getStateIndex(nextState);
-    
+
     int encounterIndex = getEncounterIndex(encounter);
     int nextEncounterIndex = getEncounterIndex(nextEncounter);
-    
-    // Q-learning 업데이트
-    float alpha = 0.1f; // 학습률
-    float gamma = 0.9f; // 할인율
-    
-    qTable[stateIndex][encounterIndex][action] += alpha * (reward + gamma * maxQ(nextStateIndex, nextEncounterIndex) - qTable[stateIndex][encounterIndex][action]);
+
+    float alpha = 0.1f;
+    float gamma = 0.9f;
+
+    Q(stateIndex, encounterIndex, action) +=
+        alpha * (
+            reward
+            + gamma * maxQ(nextStateIndex, nextEncounterIndex)
+            - Q(stateIndex, encounterIndex, action)
+        );
 }
 int agent::getStateIndex(const State& s) {
     
@@ -92,15 +114,17 @@ int agent::getEncounterIndex(const EncounterType& encounter)
     }
 }
 
-float agent::maxQ(int stateIndex, int encounterIndex) 
+float agent::maxQ(int stateIndex, int encounterIndex)
 {
-    float maxValue = qTable[stateIndex][encounterIndex][0];
-    for (int action = 1; action < 3; action++) 
+    float maxValue = Q(stateIndex, encounterIndex, 0);
+
+    for (int action = 1; action < ACTION_NUMBER; action++)
     {
-        if (qTable[stateIndex][encounterIndex][action] > maxValue) 
+        if (Q(stateIndex, encounterIndex, action) > maxValue)
         {
-            maxValue = qTable[stateIndex][encounterIndex][action];
+            maxValue = Q(stateIndex, encounterIndex, action);
         }
     }
+
     return maxValue;
 }

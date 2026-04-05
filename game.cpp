@@ -78,7 +78,7 @@ public:
             int bestAction = 0;
             for (int action = 0; action < e.actionCount(s); ++action) 
             {
-                float qValue = a.qTable[stateIndex][encounterIndex][action];
+                float qValue = a.Q(stateIndex, encounterIndex, action);
                 if (qValue > maxQValue) 
                 {
                     maxQValue = qValue;
@@ -98,7 +98,7 @@ public:
         int bestAction = 0;
         for (int action = 0; action < e.actionCount(s); ++action) 
         {
-            float qValue = a.qTable[stateIndex][encounterIndex][action];
+            float qValue = a.Q(stateIndex, encounterIndex, action);
             if (qValue > maxQValue) 
             {
                 maxQValue = qValue;
@@ -115,7 +115,7 @@ public:
         cout << "\n=== Encounter: " << toString(e.type( )) << " ===\n";
 
         int action = chooseActionHuman(e);
-        e.apply(s, action, rng);
+        e.apply(s, action, rng, false);
 
         // 승리/게임오버면 stage 올릴 필요 없음
         if (!s.isGameOver && !s.isVictory) {
@@ -134,7 +134,7 @@ public:
     StepResult greedyStepOneTurn(agent& a, const Encounter& e) 
     {
         int action = chooseActionGreedy(e, a);
-        e.apply(s, action, rng);
+        e.apply(s, action, rng, true);
 
         // 승리/게임오버면 stage 올릴 필요 없음
         if (!s.isGameOver && !s.isVictory) {
@@ -158,7 +158,7 @@ public:
 
         int action = chooseActionAgent(e, a);
         cout << "\nAgent chooses action: " << e.actionName(action) << "\n";
-        e.apply(s, action, rng);
+        e.apply(s, action, rng, false);
 
         // 승리/게임오버면 stage 올릴 필요 없음
         if (!s.isGameOver && !s.isVictory) {
@@ -521,31 +521,32 @@ float additionalReward(const State& s)
     return extra;
 }
 
-void saveQTable(const agent& a, const string& filename) 
+void saveQTable(const agent& a, const std::string& filename)
 {
-    ofstream outFile(filename);
-    if (!outFile) 
+    std::ofstream outFile(filename);
+    if (!outFile)
     {
-        cerr << "Error opening file for writing: " << filename << "\n";
+        std::cerr << "Error opening file for writing: " << filename << "\n";
         return;
     }
 
-    for (int state = 0; state < STATE_NUMBER; ++state) 
+    for (int state = 0; state < STATE_NUMBER; ++state)
     {
         outFile << "State " << state << "\n";
 
-        for (int encounter = 0; encounter < ENCOUNTER_NUMBER; ++encounter) 
+        for (int encounter = 0; encounter < ENCOUNTER_NUMBER; ++encounter)
         {
             outFile << "  Encounter " << encounter << ": ";
 
-            for (int action = 0; action < ACTION_NUMBER; ++action) {
-                outFile << a.qTable[state][encounter][action] << " ";
+            for (int action = 0; action < ACTION_NUMBER; ++action)
+            {
+                outFile << a.Q(state, encounter, action) << " ";
             }
 
             outFile << "\n";
         }
 
-        outFile << "\n"; // state 구분
+        outFile << "\n";
     }
 }
 
@@ -597,7 +598,7 @@ void loadQTable(agent& a, const std::string& filename)
 
             for (int action = 0; action < ACTION_NUMBER; ++action)
             {
-                inFile >> a.qTable[state][encounter][action];
+                inFile >> a.Q(state, encounter, action);
                 if (!inFile)
                 {
                     std::cerr << "Format error while reading qTable data\n";
