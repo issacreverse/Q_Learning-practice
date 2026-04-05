@@ -48,28 +48,32 @@ void EventEncounter::apply(State& s, int action, Rng& rng, bool isTraining) cons
     if (action == 0) {
         float r = rng.uniform01();
         //cout << "r: " << r;
-        if (r < 0.5f) {s.hp -= 10; if(!isTraining) cout << "Bad outcome: HP -10\n";}
+        if (r < 0.3f) {s.hp -= 10; if(!isTraining) cout << "Bad outcome: HP -10\n";}
         else {
-            if (r < 0.9f)
+            if (r < 0.6f)
             {
                 s.scrap += (10 + scrapScale); 
                 if(!isTraining) cout << "Good outcome: Scrap +" << (10 + scrapScale) << "\n";
             }
                 
-            else if (r < 0.95f) {
-                s.scrap += (10 + scrapScale);
-                s.fuel += 2;
-                if(!isTraining) cout << "Good outcome: Scrap +" << (10 + scrapScale) << ", Fuel +" << 2 << "\n";
+            else if (r < 0.8f) {
+                int n = rng.rangeInt(2, 5);
+                s.fuel += n;
+                if(!isTraining) cout << "Good outcome: Fuel +" << n << "\n";
             }
-            else if (r < 0.97f)
+            else
             {
-                s.power += 5; 
-                if(!isTraining) cout << "Good outcome: Power +" << 5 << "\n";
-            }
-            else {
-                s.hp += 10;
-                if(!isTraining) cout << "Good outcome: HP +" << 10 << "\n";
-                if (s.hp >= 100) s.hp = 100;
+                int n = rng.rangeInt(0, 2);
+                int p;
+                switch(n)
+                {
+                    case 0: p = 3; break;
+                    case 1: p = 5; break;
+                    case 2: p = 7; break;
+                    default: break;
+                }   
+                s.power += p; 
+                if(!isTraining) cout << "Good outcome: Power +" << p << "\n";
             }
         }
     }
@@ -83,32 +87,36 @@ void EventEncounter::apply(State& s, int action, Rng& rng, bool isTraining) cons
 
         float r = rng.uniform01();
         //cout << "r: " << r;
-        if (r < 0.3f)
+        if (r < 0.2f)
         {
-            s.hp -= 10;
-            if(!isTraining) cout << "Bad outcome: HP -10\n";
+            if(!isTraining) cout << "Bad outcome: None\n";
         } 
         else {
-            if (r < 0.5f)
-            {
-                s.scrap += (5 + scrapScale);
-                if(!isTraining) cout << "Good outcome: Scrap +" << (5 + scrapScale) << "\n";
-            }
-                
-            else if (r < 0.7f) {
-                s.scrap += (10 + scrapScale);
-                if(!isTraining) cout << "Good outcome: Scrap +" << (10 + scrapScale) << "\n";
-            }
-            else if (r < 0.85f)
+            if (r < 0.6f)
             {
                 s.scrap += (10 + scrapScale + scrapScale);
                 if(!isTraining) cout << "Good outcome: Scrap +" << (10 + scrapScale + scrapScale) << "\n";
             }
-            else {
-                s.bomb += 1;
-                if (s.bomb > MAX_BOMB) s.bomb = MAX_BOMB;
-                if(!isTraining) cout << "Good outcome: Bomb +" << 1 << "\n";
+                
+            else if (r < 0.9f) {
+                int n = rng.rangeInt(0, 2);
+                int p;
+                switch(n)
+                {
+                    case 0: p = 7; break;
+                    case 1: p = 10; break;
+                    case 2: p = 13; break;
+                    default: break;
+                }   
+                s.power += p; 
+                if(!isTraining) cout << "Good outcome: Power +" << p << "\n";
             }
+            else
+            {
+                s.hp += 10;
+                if(!isTraining) cout << "Good outcome: HP +" << 10 << "\n";
+            }
+            
         }
     }
     else {
@@ -150,15 +158,37 @@ void BattleEncounter::apply(State& s, int action, Rng& rng, bool isTraining) con
             s.scrap += (10 + scrapScale);
             if(!isTraining) cout << "Victory: Scrap +" << (10 + scrapScale) << "\n";
         }
-        else if (diff >= 0) { s.scrap += (10 + scrapScale); s.hp -= 10; if(!isTraining) cout << "Minor Victory: Scrap +" << (10 + scrapScale) << ", HP -10\n";}
+        else if (diff >= 0) 
+        { 
+            s.scrap += (10 + scrapScale); 
+            int p;
+            if(diff >= 20) p= 8;
+            else if(diff >= 15) p = 5;
+            else if(diff >= 10) p = 3;
+            else if(diff >= 5) p = 2;
+            else p = 1;
+
+            s.hp -= (10-p); // 승리지만 피해도 입음
+            if(!isTraining) cout << "Minor Victory: Scrap +" << (10 + scrapScale) << ", HP -" << (10-p) << "\n";
+        }
         else
         {
-            s.hp -= 15;
-            if(!isTraining) cout << "Defeat: HP -15\n";
+            s.hp -= 10;
+            if(!isTraining) cout << "Defeat: HP -10\n";
         } 
     } else {
-        s.hp -= 5;
-        if(!isTraining) cout << "Evaded: HP -5\n";
+        
+        int n = rng.rangeInt(0, 2);
+                int p;
+                switch(n)
+                {
+                    case 0: p = 0; break;
+                    case 1: p = 2; break;
+                    case 2: p = 4; break;
+                    default: break;
+                }   
+        s.hp -= p;
+        if(!isTraining) cout << "Evaded: HP -" << p << "\n";
     }
     clampAndCheck(s);
 }
@@ -176,7 +206,7 @@ int ShopEncounter::actionCount(const State&) const {
 const char* ShopEncounter::actionName(int a) const {
     switch (a) {
         case 0: return "Repair(10 scrap -> 20 hp)";
-        case 1: return "BuyWeapons(15 scrap -> 15 power)";
+        case 1: return "BuyWeapons(25 scrap -> 15 power)";
         default: return "BuyFuel(5 scrap -> 3 fuel)";
     }
 }
@@ -185,7 +215,7 @@ void ShopEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const
     if (s.isGameOver || s.isVictory) return;
 
     const int repairCost = 10, repairGain = 20;
-    const int weaponCost = 15, powerGain = 15;
+    const int weaponCost = 25, powerGain = 15;
     const int fuelCost = 5, fuelGain = 3;
 
     if (action == 0) {
@@ -225,7 +255,7 @@ int RebelionEncounter::actionCount(const State&) const {
 }
 
 const char* RebelionEncounter::actionName(int a) const {
-    return (a == 0) ? "Fight" : (a == 1) ? "Evade" : "Fight(Use Bomb)";
+    return (a == 0) ? "Fight" : (a == 1) ? "Evade(Game Over)" : "Fight(Use Bomb)";
 }
 
 void RebelionEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const {
@@ -238,12 +268,13 @@ void RebelionEncounter::apply(State& s, int action, Rng& rng, bool isTraining) c
         s.bomb = 0; // 폭탄 사용 후 폭탄 0개
     }
     if (action != 1) {
-        if (diff >= 25) {s.fuel += 3; if(!isTraining)cout << "Victory: Fuel +" << 3 << "\n";}
+        if (diff >= 45) {s.fuel += 3; if(!isTraining)cout << "Victory: Fuel +" << 3 << "\n";}
         else if (diff >= 0) { s.fuel += 3; s.hp -= 10; if(!isTraining)cout << "Minor Victory: Fuel +" << 3 << ", HP -10\n";}
         else {s.hp -= 15; if(!isTraining)cout << "Defeat: HP -15\n";}
     } else{
-        s.hp -= 8;
-        if(!isTraining) cout << "Evaded: HP -8\n";
+        s.hp = 0;
+        s.isGameOver = true;
+        return;
     } 
 
     clampAndCheck(s);
@@ -260,7 +291,7 @@ int BossEncounter::actionCount(const State&) const {
 }
 
 const char* BossEncounter::actionName(int a) const {
-    return (a == 0) ? "Fight" : (a == 1) ? "Evade" : "Fight(Use Bomb)";
+    return (a == 0) ? "Fight" : (a == 1) ? "Evade(Game Over)" : "Fight(Use Bomb)";
 }
 
 void BossEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const {
@@ -278,12 +309,28 @@ void BossEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const
         diff += s.bomb*BOMB_POWER_BONUS; // 폭탄 사용 시 파워 차이에 보너스
         s.bomb = 0; // 폭탄 사용 후 폭탄 0개
     }
-    if (diff >= 25) {
+
+    int n = rng.rangeInt(0, 2);
+    int p;
+    switch(n)
+    {
+        case 0: p = 0; break;
+        case 1: p = 3; break;
+        case 2: p = 6; break;
+        default: break;
+    }   
+
+    if (diff >= 25 + p) {
         s.isVictory = true;
         if(!isTraining) cout << "The enemy flagship has been annihilated!" << "\n";
     }
-    else if (diff >= 0) {
-        s.hp -= 20;
+    else if (diff >= 0) 
+    {
+        if(diff>= 15 + p) s.hp -= 10;
+        else if(diff>= 10 + p) s.hp -= 20;
+        else if(diff>= 5 + p) s.hp -= 30;
+        else s.hp -= 40;
+
         if (s.hp <= 0) {
             s.hp = 0;
             s.isGameOver = true;

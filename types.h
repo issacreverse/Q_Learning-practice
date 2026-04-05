@@ -20,8 +20,12 @@ static const int ENCOUNTER_NUMBER = 5; // 인카운터의 총 개수 (event, bat
 static const int ACTION_NUMBER = 3; // 행동의 총 개수 (최대 3개)
 
 static const int BOMB_MAINTENANCE_COST = 1; // 폭탄 유지 비용
-static const int BOMB_POWER_BONUS = 5; // 폭탄 사용 시 파워 보너스
-static const int MAX_BOMB = 2; // 최대 폭탄 개수
+static const int BOMB_POWER_BONUS = 10; // 폭탄 사용 시 파워 보너스
+static const int MAX_BOMB = 3; // 최대 폭탄 개수
+
+static const int BATTLE_ENCOUNTER_PROBABILITY = 3; // 배틀 인카운터 상대적 비율
+static const int SHOP_ENCOUNTER_PROBABILITY = 2; // 상점 인카운터 상대적 비율
+static const int EVENT_ENCOUNTER_PROBABILITY = 4; // 반란 인카운터 상대적 비율 
 
 // ------------ Game State  ------------
 struct State {

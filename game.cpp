@@ -182,9 +182,14 @@ public:
             return *rebelion;
         }
         // Event/Battle/Shop 랜덤
-        int idx = rng.rangeInt(0, (int)encounters.size());
-
-        return *encounters[idx];
+        int idx = rng.rangeInt(0, BATTLE_ENCOUNTER_PROBABILITY + SHOP_ENCOUNTER_PROBABILITY + EVENT_ENCOUNTER_PROBABILITY);
+        if (idx < BATTLE_ENCOUNTER_PROBABILITY) {
+            return *encounters[1]; // Battle
+        } else if (idx < BATTLE_ENCOUNTER_PROBABILITY + SHOP_ENCOUNTER_PROBABILITY) {
+            return *encounters[2]; // Shop
+        } else {
+            return *encounters[0]; // Event
+        }
     }
 
     const State& state() const { return s; }
