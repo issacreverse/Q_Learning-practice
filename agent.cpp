@@ -21,6 +21,7 @@ int agent::getStateIndex(const State& s) {
     int powerIndex;
     int fuelIndex;  
     int stageIndex;
+    int bombIndex;
     int enounterIndex; 
 
     //hpIndex
@@ -68,8 +69,14 @@ int agent::getStateIndex(const State& s) {
     else if(s.stage <= 19) stageIndex = 2;
     else stageIndex = 3;
 
+    //bombIndex
+    if(s.bomb == 0) bombIndex = 0;
+    else if (s.bomb == 1) bombIndex = 1;
+    else if (s.bomb == 2) bombIndex = 2;
+    else bombIndex = 3;
 
-    return hpIndex * (6*9*7*4) + scrapIndex * (9*7*4) + powerIndex * (7*4) + fuelIndex * 4 + stageIndex;
+
+    return hpIndex * (6*9*7*4*4) + scrapIndex * (9*7*4*4) + powerIndex * (7*4*4) + fuelIndex * (4*4) + stageIndex * 4 + bombIndex;
 }
 
 int agent::getEncounterIndex(const EncounterType& encounter) 

@@ -2,6 +2,9 @@
 #include <fstream>
 #include <filesystem>
 #include <ctime>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -121,6 +124,9 @@ public:
 
         // 턴 끝날 떄 연료 소모 (다음 행선지로 이동): fuel -1 (0 아래로 X)
         if (s.fuel > 0) s.fuel -= 1;
+        // 폭탄 유지비용
+        if(s.scrap >= s.bomb*BOMB_MAINTENANCE_COST) s.scrap -= s.bomb*BOMB_MAINTENANCE_COST;
+        else s.bomb = 0; // 유지비용 낼 스크랩이 부족하면 폭탄 0개
 
         return { e.type(), action };
     }
@@ -137,6 +143,9 @@ public:
 
         // 턴 끝날 떄 연료 소모 (다음 행선지로 이동): fuel -1 (0 아래로 X)
         if (s.fuel > 0) s.fuel -= 1;
+        // 폭탄 유지비용
+        if(s.scrap >= s.bomb*BOMB_MAINTENANCE_COST) s.scrap -= s.bomb*BOMB_MAINTENANCE_COST;
+        else s.bomb = 0; // 유지비용 낼 스크랩이 부족하면 폭탄 0개
 
         return { e.type(), action };
     }
@@ -158,6 +167,9 @@ public:
 
         // 턴 끝날 떄 연료 소모 (다음 행선지로 이동): fuel -1 (0 아래로 X)
         if (s.fuel > 0) s.fuel -= 1;
+        // 폭탄 유지비용
+        if(s.scrap >= s.bomb*BOMB_MAINTENANCE_COST) s.scrap -= s.bomb*BOMB_MAINTENANCE_COST;
+        else s.bomb = 0; // 유지비용 낼 스크랩이 부족하면 폭탄 0개
 
         return { e.type(), action };
     }
@@ -198,6 +210,7 @@ static void printState(const State& s) {
          << " Scrap=" << s.scrap
          << " Power=" << s.power
          << " Fuel=" << s.fuel
+         << " Bomb=" << s.bomb
          << " Stage=" << s.stage
          << " Victory=" << (s.isVictory ? "true" : "false")
          << " GameOver=" << (s.isGameOver ? "true" : "false")
@@ -208,7 +221,7 @@ int main()
 {
 while(true)
 {
-        cout << "=== FTL-like Game Simulation ===\n";
+    cout << "=== FTL-like Game Simulation ===\n";
     cout << "Select mode:\n";
     cout << "  [0] Train Agent (Q-learning)\n";
     cout << "  [1] Test Agent\n";
@@ -284,6 +297,7 @@ while(true)
 
         int iterations = 1000;
         int checkpointInterval = 500;
+        int gameOverCount = 0;
 
         cout << "Enter number of training iterations: ";
         cin >> iterations;
@@ -306,10 +320,10 @@ while(true)
             
             const Encounter * lastEncounterType; // 마지막으로 만난 인카운터 타입 저장
             const Encounter * nextEncounterType; // 다음 턴에 만날 인카운터 타입 저장
-            int gameOverCount = 0;
+            
 
             if(i != 0 && i % checkpointInterval == 0) {
-                cout << "Iteration: " << i << ", Game Over Count: " << gameOverCount << "\n";
+                cout << "Iteration: " << i << ", Game Over Count: " << gameOverCount << ", Game Over Rate: " << (float)gameOverCount / i * 100 << "%\n";
             }
             if(i % checkpointInterval == 0) {
                 saveQTable(a, string(buf) + "/" + "qtable_checkpoint_" + std::to_string(i) + ".txt");
@@ -502,6 +516,8 @@ float additionalReward(const State& s)
     if(diff >= 25) extra += 1;
     if(diff >= 30) extra += 1;  
 
+    extra += s.bomb*2;
+
     return extra;
 }
 
@@ -532,9 +548,7 @@ void saveQTable(const agent& a, const string& filename)
         outFile << "\n"; // state 구분
     }
 }
-#include <fstream>
-#include <iostream>
-#include <string>
+
 
 void loadQTable(agent& a, const std::string& filename)
 {
