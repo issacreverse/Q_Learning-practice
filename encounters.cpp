@@ -18,6 +18,10 @@ void Encounter::clampAndCheck(State& s) {
         s.hp = 0;
         s.isGameOver = true;
     }
+    if (s.hp > 100) s.hp = 100;
+    if (s.fuel < 0) s.fuel = 0;
+    if (s.scrap < 0) s.scrap = 0;
+    if (s.power < 0) s.power = 0;
 }
 
 // ------------ Event ------------
@@ -39,7 +43,9 @@ void EventEncounter::apply(State& s, int action, Rng& rng, bool isTraining) cons
 
     int scrapScale = int(s.stage / 3);
     // 내가 강할 수록 이벤트 스크랩 보상이 줄어듦. 
-    float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    int tier = (s.stage - 1) / 3;
+    float enemyStrength = ENEMY_BASE_POWER[tier];
+    enemyStrength += rng.rangeInt(-2, 3);
     float diff = s.power - enemyStrength;
 
     if(diff >= 25) scrapScale -= 8;
@@ -143,7 +149,10 @@ const char* BattleEncounter::actionName(int a) const {
 void BattleEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const {
     if (s.isGameOver || s.isVictory) return;
 
-    float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    //float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    int tier = (s.stage - 1) / 3;
+    float enemyStrength = ENEMY_BASE_POWER[tier];
+    enemyStrength += rng.rangeInt(-2, 3);
     float diff = s.power - enemyStrength;
 
     int scrapScale = int(s.stage / 3);
@@ -176,7 +185,8 @@ void BattleEncounter::apply(State& s, int action, Rng& rng, bool isTraining) con
             s.hp -= 10;
             if(!isTraining) cout << "Defeat: HP -10\n";
         } 
-    } else {
+    } 
+    else {
         
         int n = rng.rangeInt(0, 2);
                 int p;
@@ -220,10 +230,18 @@ void ShopEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const
 
     if (action == 0) {
         if (s.scrap >= repairCost) {
+            if(s.hp >= 100) {
+                if(!isTraining) cout << "HP is already full. Repair has no effect.\n";
+                return;
+            }
             s.scrap -= repairCost;
             s.hp += repairGain;
             if (s.hp >= 100) s.hp = 100;
             if(!isTraining) cout << "Repaired: Scrap -" << repairCost << ", HP +" << repairGain << "\n";
+        }
+        else
+        {
+            if(!isTraining) cout << "Not enough scrap to repair. Action has no effect.\n";
         }
     }
     else if (action == 1) {
@@ -232,12 +250,20 @@ void ShopEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const
             s.power += powerGain;
             if(!isTraining) cout << "Bought Weapons: Scrap -" << weaponCost << ", Power +" << powerGain << "\n";
         }
+        else
+        {
+            if(!isTraining) cout << "Not enough scrap to buy weapons. Action has no effect.\n";
+        }
     }
     else {
         if (s.scrap >= fuelCost) {
             s.scrap -= fuelCost;
             s.fuel += fuelGain;
             if(!isTraining) cout << "Bought Fuel: Scrap -" << fuelCost << ", Fuel +" << fuelGain << "\n";
+        }
+        else
+        {
+            if(!isTraining) cout << "Not enough scrap to buy fuel. Action has no effect.\n";
         }
     }
 
@@ -261,8 +287,12 @@ const char* RebelionEncounter::actionName(int a) const {
 void RebelionEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const {
     if (s.isGameOver || s.isVictory) return;
 
-    float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    //float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    int tier = (s.stage - 1) / 3;
+    float enemyStrength = ENEMY_BASE_POWER[tier];
+    enemyStrength += rng.rangeInt(-2, 3);
     float diff = s.power - enemyStrength;
+
     if(action == 2) {
         diff += s.bomb*BOMB_POWER_BONUS; // 폭탄 사용 시 파워 차이에 보너스
         s.bomb = 0; // 폭탄 사용 후 폭탄 0개
@@ -303,8 +333,12 @@ void BossEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const
         return;
     }
 
-    float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    //float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    int tier = (s.stage - 1) / 3;
+    float enemyStrength = ENEMY_BASE_POWER[tier];
+    enemyStrength += rng.rangeInt(-2, 3);
     float diff = s.power - enemyStrength;
+    
     if(action == 2) {
         diff += s.bomb*BOMB_POWER_BONUS; // 폭탄 사용 시 파워 차이에 보너스
         s.bomb = 0; // 폭탄 사용 후 폭탄 0개
@@ -320,16 +354,18 @@ void BossEncounter::apply(State& s, int action, Rng& rng, bool isTraining) const
         default: break;
     }   
 
-    if (diff >= 25 + p) {
+    if (diff >= 35 + p) {
         s.isVictory = true;
         if(!isTraining) cout << "The enemy flagship has been annihilated!" << "\n";
     }
     else if (diff >= 0) 
     {
-        if(diff>= 15 + p) s.hp -= 10;
-        else if(diff>= 10 + p) s.hp -= 20;
-        else if(diff>= 5 + p) s.hp -= 30;
-        else s.hp -= 40;
+        if(diff>= 25 + p) s.hp -= 10;
+        else if(diff>= 20 + p) s.hp -= 20;
+        else if(diff>= 15 + p) s.hp -= 30;
+        else if(diff>= 10 + p) s.hp -= 40;
+        else if(diff>= 5 + p) s.hp -= 50;
+        else s.hp -= 60;
 
         if (s.hp <= 0) {
             s.hp = 0;

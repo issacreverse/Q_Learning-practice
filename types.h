@@ -8,14 +8,29 @@
 #include <algorithm>
 #include <limits>
 
-static const int ENEMY_BASE_POWER = 15;
+//static const int ENEMY_BASE_POWER = 15;
+static const int ENEMY_BASE_POWER[] = {0, 5, 10, 20, 35, 45, 55};
 static const float ENEMY_POWER_SCALE = 5.0f;
 static const float GREEDY_VALUE = 0.2f; // 20% 확률로 랜덤 행동 선택
 static const float GAME_STEP_PENALTY = 0.01f; // 매 턴마다 패널티
-static const float VICTORY_REWARD = 30.0f; // 승리 보상
-static const float GAME_OVER_PENALTY = 30.0f; // 게임 오버 패널티 
+static const float VICTORY_REWARD = 50.0f; // 승리 보상
+static const float GAME_OVER_PENALTY = 25.0f; // 게임 오버 패널티 
 
-static const int STATE_NUMBER = 54432; // 상태의 총 개수 (9*6*9*7*4*4)
+
+static const int HP_BUCKET_COUNT = 9;
+static const int SCRAP_BUCKET_COUNT = 6;
+static const int POWER_BUCKET_COUNT = 9;
+static const int FUEL_BUCKET_COUNT = 7;
+static const int STAGE_BUCKET_COUNT = 4;
+static const int BOMB_BUCKET_COUNT = 4;
+
+static const int STATE_NUMBER = HP_BUCKET_COUNT 
+                                * SCRAP_BUCKET_COUNT 
+                                * POWER_BUCKET_COUNT 
+                                * FUEL_BUCKET_COUNT 
+                                * STAGE_BUCKET_COUNT
+                                * BOMB_BUCKET_COUNT; // 상태의 총 개수 (9*6*9*7*4*4)
+                                
 static const int ENCOUNTER_NUMBER = 5; // 인카운터의 총 개수 (event, battle, shop, rebelion, boss)
 static const int ACTION_NUMBER = 3; // 행동의 총 개수 (최대 3개)
 
@@ -155,4 +170,5 @@ class agent {
 
     float& Q(int stateIndex, int encounterIndex, int actionIndex);
     const float& Q(int stateIndex, int encounterIndex, int actionIndex) const;
+    void maskBombActionsWhenNoBomb();
 };

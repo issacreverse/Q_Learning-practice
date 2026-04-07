@@ -2,13 +2,18 @@
 #include <fstream>
 #include <filesystem>
 #include <ctime>
-#include <fstream>
 #include <iostream>
 #include <string>
+
+//실행 로그 저장 
+#include <streambuf>
+#include <ostream>
 
 using namespace std;
 
 static int t;
+static int score;
+
 class agent;
 
 float additionalReward(const State& s);
@@ -16,6 +21,24 @@ void saveQTable(const agent& a, const string& filename);
 void loadQTable(agent& a, const string& filename);
 
 int visitCount[STATE_NUMBER][ENCOUNTER_NUMBER] = {};
+
+class TeeBuf : public std::streambuf {
+public:
+    TeeBuf(std::streambuf* sb1, std::streambuf* sb2)
+        : sb1(sb1), sb2(sb2) {}
+
+protected:
+    virtual int overflow(int c) override {
+        if (c == EOF) return !EOF;
+        if (sb1->sputc(c) == EOF || sb2->sputc(c) == EOF)
+            return EOF;
+        return c;
+    }
+
+private:
+    std::streambuf* sb1;
+    std::streambuf* sb2;
+};
 
 class Game 
 {
@@ -134,7 +157,15 @@ public:
     StepResult greedyStepOneTurn(agent& a, const Encounter& e) 
     {
         int action = chooseActionGreedy(e, a);
+        if(e.type() == EncounterType::Boss || e.type() == EncounterType::Rebelion || e.type() == EncounterType::Battle)
+        {
+            if(action == 2 && s.bomb == 0) // 폭탄 행동 선택했는데 폭탄이 없는 경우
+            {
+                action = 0; //폭탄 없는 선택으로 변경.
+            }
+        }
         e.apply(s, action, rng, true);
+        
 
         // 승리/게임오버면 stage 올릴 필요 없음
         if (!s.isGameOver && !s.isVictory) {
@@ -252,7 +283,7 @@ while(true)
     // Human Play 모드
     if(mode == 2)
     {
-        int score = 0;
+        score = 0;
         Game game(time(nullptr)); // 시드로 현재 시간 사용
         game.reset();
 
@@ -331,12 +362,16 @@ while(true)
                 cout << "Iteration: " << i << ", Game Over Count: " << gameOverCount << ", Game Over Rate: " << (float)gameOverCount / i * 100 << "%\n";
             }
             if(i % checkpointInterval == 0) {
-                saveQTable(a, string(buf) + "/" + "qtable_checkpoint_" + std::to_string(i) + ".txt");
+                agent temp = a;
+                temp.maskBombActionsWhenNoBomb();
+                saveQTable(temp, string(buf) + "/" + "qtable_checkpoint_" + std::to_string(i) + ".txt");
             }
             game.reset();
             // 안전장치: 무한 루프 방지
             const int MAX_TURNS = 100;
             
+            score = 0;
+
             lastEncounterType = &game.pickEncounter(); // 초기 인카운터 타입 설정
             for (t = 1; t <= MAX_TURNS; ++t) 
             {
@@ -346,27 +381,26 @@ while(true)
                 StepResult r = game.greedyStepOneTurn(a, *lastEncounterType); //행동 선택 
                 const State& after = game.state(); //행동의 결과로 나온 다음 상태 저장
                 nextEncounterType = &game.pickEncounter(); // 다음 인카운터 타입 설정
-                
-                float reward = 0; 
+                                
 
                 if (after.isVictory) 
                 {
                     //cout << "\n=== VICTORY! ===\n";
-                    reward += VICTORY_REWARD; // 승리 보상
-                    reward += additionalReward(after);
+                    score += VICTORY_REWARD; // 승리 보상
+                    score += additionalReward(after);
                 }
                 else if(after.isGameOver) 
                 {
                     //cout << "\n=== GAME OVER ===\n";
-                    reward -= GAME_OVER_PENALTY; // 게임 오버 패널티
-                    reward += additionalReward(after); // 게임 오버 시에도 추가 보상/패널티 반영
+                    score -= GAME_OVER_PENALTY; // 게임 오버 패널티
+                    score += additionalReward(after); // 게임 오버 시에도 추가 보상/패널티 반영
                     gameOverCount++;
                 }
                 else
                 {
-                    reward -= GAME_STEP_PENALTY; //턴마다 패널티
+                    score -= GAME_STEP_PENALTY; //턴마다 패널티
                 }
-                a.learn(before, (*lastEncounterType).type(), r.action, reward, after, (*nextEncounterType).type()); //에이전트 학습
+                a.learn(before, (*lastEncounterType).type(), r.action, score, after, (*nextEncounterType).type()); //에이전트 학습
                 lastEncounterType = nextEncounterType; // 다음 턴을 위해 마지막 인카운터 업데이트
                 if(after.isVictory || after.isGameOver) 
                 {
@@ -395,16 +429,16 @@ while(true)
     //test agent mode 
     else if(mode == 1)
     {
-        int score = 0;
+        score = 0;
         string dirname;
         string filename;
+        int iteration;
         //select Q-table file
         while (true)
         {
             
             cout << "Enter Q-table directory name: ";
             cin >> dirname;
-            int iteration;
             cout << "Enter agent iteration version to load: ";
             cin >> iteration;
             filename = "qtable_checkpoint_" + std::to_string(iteration) + ".txt";
@@ -421,7 +455,37 @@ while(true)
                 std::cerr << "Try again.\n";
             }
         }
+
+        string logFilename = std::to_string(iteration) + "_log.txt";
+        string logPath = dirname + "/" + logFilename;
+
+        std::ofstream logFile(logPath, std::ios::app);
+        logFile << "\n===== NEW RUN =====\n";
+
+        if (!logFile.is_open()) {
+            std::cerr << "Failed to create log file\n";
+            return 1;
+        }
+
+        //올드 버퍼 저장 
+        std::streambuf* oldCoutBuf = std::cout.rdbuf();
+        std::streambuf* oldCerrBuf = std::cerr.rdbuf();
+
+        TeeBuf teeBuf(oldCoutBuf, logFile.rdbuf());
+        std::cout.rdbuf(&teeBuf);
+
         
+        /*
+        // cout에 콘솔이랑 파일 동시에 출력
+        TeeBuf teeBuf(std::cout.rdbuf(), logFile.rdbuf());
+        std::ostream teeStream(&teeBuf);
+        std::cout.rdbuf(teeStream.rdbuf());
+        
+        
+        // cerr
+        std::cerr.rdbuf(teeStream.rdbuf());
+        */
+
         agent a;
         loadQTable(a, dirname + "/" + filename);
 
@@ -460,8 +524,11 @@ while(true)
                 break;
             }
         }
+        //버퍼 복구 
+        std::cout.rdbuf(oldCoutBuf);
     }
     cout << "\n=== Run End ===\n";
+    
 }   
 }
 
@@ -497,11 +564,11 @@ float additionalReward(const State& s)
     diff >= 30  +5
     */
 
-    if(s.hp >= 30) extra += 1;
-    if(s.hp >= 40) extra += 1;
-    if(s.hp >= 50) extra += 1;
-    if(s.hp >= 60) extra += 1;
-    if(s.hp >= 70) extra += 1;
+    if(s.hp >= 30) extra += 5;
+    if(s.hp >= 40) extra += 5;
+    if(s.hp >= 50) extra += 5;
+    if(s.hp >= 60) extra += 5;
+    if(s.hp >= 70) extra += 5;
 
     if(s.scrap >= 15) extra += 1;
     if(s.scrap >= 30) extra += 1;
@@ -513,11 +580,14 @@ float additionalReward(const State& s)
     if(s.fuel >= 7 && s.fuel <= 9) extra += 3;
     if(s.fuel >= 10) extra += 4;
 
-    float enemyStrength = ENEMY_BASE_POWER + ENEMY_POWER_SCALE * ((s.stage-1) / 3);
+    int tier = (s.stage - 1) / 3;
+    float enemyStrength = ENEMY_BASE_POWER[tier];
+    
     float diff = s.power - enemyStrength;
-    if(diff >= 10) extra += 1;
+    
+    //if(diff >= 10) extra += 1;
     if(diff >= 15) extra += 1;
-    if(diff >= 20) extra += 1;
+    //if(diff >= 20) extra += 1;
     if(diff >= 25) extra += 1;
     if(diff >= 30) extra += 1;  
 
@@ -613,3 +683,5 @@ void loadQTable(agent& a, const std::string& filename)
         }
     }
 }
+
+

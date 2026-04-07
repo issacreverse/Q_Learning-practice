@@ -27,7 +27,7 @@ void agent::learn(const State& state, const EncounterType& encounter, int action
     int nextEncounterIndex = getEncounterIndex(nextEncounter);
 
     float alpha = 0.1f;
-    float gamma = 0.9f;
+    float gamma = 0.95f;
 
     Q(stateIndex, encounterIndex, action) +=
         alpha * (
@@ -98,7 +98,13 @@ int agent::getStateIndex(const State& s) {
     else bombIndex = 3;
 
 
-    return hpIndex * (6*9*7*4*4) + scrapIndex * (9*7*4*4) + powerIndex * (7*4*4) + fuelIndex * (4*4) + stageIndex * 4 + bombIndex;
+    //return hpIndex * (6*9*7*4*4) + scrapIndex * (9*7*4*4) + powerIndex * (7*4*4) + fuelIndex * (4*4) + stageIndex * 4 + bombIndex;
+    return hpIndex    * (SCRAP_BUCKET_COUNT * POWER_BUCKET_COUNT * FUEL_BUCKET_COUNT * STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+     + scrapIndex * (POWER_BUCKET_COUNT * FUEL_BUCKET_COUNT * STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+     + powerIndex * (FUEL_BUCKET_COUNT * STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+     + fuelIndex  * (STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+     + stageIndex * (BOMB_BUCKET_COUNT)
+     + bombIndex;
 }
 
 int agent::getEncounterIndex(const EncounterType& encounter) 
@@ -128,3 +134,30 @@ float agent::maxQ(int stateIndex, int encounterIndex)
 
     return maxValue;
 }
+
+void agent::maskBombActionsWhenNoBomb()
+{
+    for (int hp = 0; hp < HP_BUCKET_COUNT; ++hp)
+    for (int scrap = 0; scrap < SCRAP_BUCKET_COUNT; ++scrap)
+    for (int power = 0; power < POWER_BUCKET_COUNT; ++power)
+    for (int fuel = 0; fuel < FUEL_BUCKET_COUNT; ++fuel)
+    for (int stage = 0; stage < STAGE_BUCKET_COUNT; ++stage)
+    {
+        int bomb = 0; // 폭탄 없음 상태
+
+        int stateIndex =
+            hp    * (SCRAP_BUCKET_COUNT * POWER_BUCKET_COUNT * FUEL_BUCKET_COUNT * STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+          + scrap * (POWER_BUCKET_COUNT * FUEL_BUCKET_COUNT * STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+          + power * (FUEL_BUCKET_COUNT * STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+          + fuel  * (STAGE_BUCKET_COUNT * BOMB_BUCKET_COUNT)
+          + stage * (BOMB_BUCKET_COUNT)
+          + bomb;
+
+        // encounter: Battle(1), Rebelion(3), Boss(4)
+        Q(stateIndex, 1, 2) = -1000.0f;
+        Q(stateIndex, 3, 2) = -1000.0f;
+        Q(stateIndex, 4, 2) = -1000.0f;
+    }
+}
+
+
