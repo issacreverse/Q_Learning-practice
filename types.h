@@ -12,7 +12,7 @@
 static const int ENEMY_BASE_POWER[] = {0, 5, 10, 20, 35, 45, 55};
 static const float ENEMY_POWER_SCALE = 5.0f;
 static const float GREEDY_VALUE = 0.2f; // 20% 확률로 랜덤 행동 선택
-static const float GAME_STEP_PENALTY = 0.01f; // 매 턴마다 패널티
+//static const float GAME_STEP_PENALTY = 0.01f; // 매 턴마다 패널티
 static const float VICTORY_REWARD = 50.0f; // 승리 보상
 static const float GAME_OVER_PENALTY = 25.0f; // 게임 오버 패널티 
 

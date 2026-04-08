@@ -51,6 +51,8 @@ void EventEncounter::apply(State& s, int action, Rng& rng, bool isTraining) cons
     if(diff >= 25) scrapScale -= 8;
     else if(diff >= 0) scrapScale -= 3;
 
+    if(scrapScale <= 0) scrapScale = 0;
+
     if (action == 0) {
         float r = rng.uniform01();
         //cout << "r: " << r;

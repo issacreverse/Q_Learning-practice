@@ -398,7 +398,7 @@ while(true)
                 }
                 else
                 {
-                    score -= GAME_STEP_PENALTY; //턴마다 패널티
+                    //score -= GAME_STEP_PENALTY; //턴마다 패널티
                 }
                 a.learn(before, (*lastEncounterType).type(), r.action, score, after, (*nextEncounterType).type()); //에이전트 학습
                 lastEncounterType = nextEncounterType; // 다음 턴을 위해 마지막 인카운터 업데이트
