@@ -1,0 +1,108 @@
+
+===== NEW RUN =====
+10000 runs completed
+20000 runs completed
+30000 runs completed
+40000 runs completed
+50000 runs completed
+60000 runs completed
+70000 runs completed
+80000 runs completed
+90000 runs completed
+100000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_0.txt
+Average Score: 0.01031
+High Score: 66
+Win Rate: 0.018%
+
+
+===== NEW RUN =====
+10000 runs completed
+20000 runs completed
+30000 runs completed
+40000 runs completed
+50000 runs completed
+60000 runs completed
+70000 runs completed
+80000 runs completed
+90000 runs completed
+100000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_2000000.txt
+Average Score: 50.1706
+High Score: 84
+Win Rate: 79.579%
+
+
+===== NEW RUN =====
+10000 runs completed
+20000 runs completed
+30000 runs completed
+40000 runs completed
+50000 runs completed
+60000 runs completed
+70000 runs completed
+80000 runs completed
+90000 runs completed
+100000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_4000000.txt
+Average Score: 49.4003
+High Score: 83
+Win Rate: 78.636%
+
+
+===== NEW RUN =====
+10000 runs completed
+20000 runs completed
+30000 runs completed
+40000 runs completed
+50000 runs completed
+60000 runs completed
+70000 runs completed
+80000 runs completed
+90000 runs completed
+100000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_6000000.txt
+Average Score: 43.6808
+High Score: 84
+Win Rate: 70.616%
+
+
+===== NEW RUN =====
+10000 runs completed
+20000 runs completed
+30000 runs completed
+40000 runs completed
+50000 runs completed
+60000 runs completed
+70000 runs completed
+80000 runs completed
+90000 runs completed
+100000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_8000000.txt
+Average Score: 52.2921
+High Score: 83
+Win Rate: 81.498%
+
+
+===== NEW RUN =====
+10000 runs completed
+20000 runs completed
+30000 runs completed
+40000 runs completed
+50000 runs completed
+60000 runs completed
+70000 runs completed
+80000 runs completed
+90000 runs completed
+100000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_10000000.txt
+Average Score: 50.5787
+High Score: 83
+Win Rate: 80.023%
+

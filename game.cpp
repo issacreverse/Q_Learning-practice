@@ -204,6 +204,29 @@ public:
 
         return { e.type(), action };
     }
+    StepResult Eval_agentStepOneTurn(agent& a) 
+    {
+        const Encounter& e = pickEncounter();
+        //cout << "\n=== Turn: " << t << " ===";
+        //cout << "\n=== Encounter: " << toString(e.type( )) << " ===\n";
+
+        int action = chooseActionAgent(e, a);
+        //cout << "\nAgent chooses action: " << e.actionName(action) << "\n";
+        e.apply(s, action, rng, true);
+
+        // 승리/게임오버면 stage 올릴 필요 없음
+        if (!s.isGameOver && !s.isVictory) {
+            s.stage += 1;
+        }
+
+        // 턴 끝날 떄 연료 소모 (다음 행선지로 이동): fuel -1 (0 아래로 X)
+        if (s.fuel > 0) s.fuel -= 1;
+        // 폭탄 유지비용
+        if(s.scrap >= s.bomb*BOMB_MAINTENANCE_COST) s.scrap -= s.bomb*BOMB_MAINTENANCE_COST;
+        else s.bomb = 0; // 유지비용 낼 스크랩이 부족하면 폭탄 0개
+
+        return { e.type(), action };
+    }
     const Encounter& pickEncounter() 
     {
         if (s.stage >= BOSS_STAGE) {
@@ -261,13 +284,14 @@ while(true)
     cout << "Select mode:\n";
     cout << "  [0] Train Agent (Q-learning)\n";
     cout << "  [1] Test Agent\n";
-    cout << "  [2] Human Play\n";
-    cout << "  [3] Exit\n";
+    cout << "  [2] Evaluate Agent (Multiple Tests)\n";
+    cout << "  [3] Human Play\n";
+    cout << "  [4] Exit\n";
 
     cout << "Enter mode number: ";
     int mode;
     while (true) {
-        if (cin >> mode && 0 <= mode && mode <= 3) {
+        if (cin >> mode && 0 <= mode && mode <= 4) {
             break;
         }
         cin.clear();
@@ -276,12 +300,12 @@ while(true)
     }
 
     cout << "=== Run Start ===\n";
-    if(mode == 3) {
+    if(mode == 4) {
         cout << "Exiting program.\n";
         return 0;
     }
     // Human Play 모드
-    if(mode == 2)
+    if(mode == 3)
     {
         score = 0;
         Game game(time(nullptr)); // 시드로 현재 시간 사용
@@ -526,6 +550,131 @@ while(true)
         }
         //버퍼 복구 
         std::cout.rdbuf(oldCoutBuf);
+    }
+    //evaluate agent mode 
+    else if(mode == 2)
+    {
+        
+        string dirname;
+        string filename;
+        int iteration;
+        //select Q-table file
+        while (true)
+        {
+            
+            cout << "Enter Q-table directory name: ";
+            cin >> dirname;
+            cout << "Enter agent iteration version to load: ";
+            cin >> iteration;
+            filename = "qtable_checkpoint_" + std::to_string(iteration) + ".txt";
+
+            bool fileExists = std::filesystem::exists(dirname + "/" + filename);
+
+            if (fileExists)
+            {
+                break; // 성공하면 탈출
+            }
+            else
+            {
+                std::cerr << "Error opening file: " << filename << "\n";
+                std::cerr << "Try again.\n";
+            }
+        }
+
+        string logFilename = "evaluation.txt";
+        string logPath = dirname + "/" + logFilename;
+
+        std::ofstream logFile(logPath, std::ios::app);
+        logFile << "\n===== NEW RUN =====\n";
+
+        if (!logFile.is_open()) {
+            std::cerr << "Failed to create log file\n";
+            return 1;
+        }
+
+        //올드 버퍼 저장 
+        std::streambuf* oldCoutBuf = std::cout.rdbuf();
+        std::streambuf* oldCerrBuf = std::cerr.rdbuf();
+
+        TeeBuf teeBuf(oldCoutBuf, logFile.rdbuf());
+        std::cout.rdbuf(&teeBuf);
+
+        
+        /*
+        // cout에 콘솔이랑 파일 동시에 출력
+        TeeBuf teeBuf(std::cout.rdbuf(), logFile.rdbuf());
+        std::ostream teeStream(&teeBuf);
+        std::cout.rdbuf(teeStream.rdbuf());
+        
+        
+        // cerr
+        std::cerr.rdbuf(teeStream.rdbuf());
+        */
+
+        agent a;
+        loadQTable(a, dirname + "/" + filename);
+        int score_sum = 0;
+        int maxScore = 0;
+        int victory_count = 0;
+
+        for(int i=1; i<AGENT_EVALUATION_ITERATIONS+1; i++)
+        {
+            if(i%(AGENT_EVALUATION_ITERATIONS/10) == 0)
+            {
+                cout << i << " runs completed\n";
+            }
+            Game game(time(nullptr) + i + 21); // 시드로 현재 시간 사용
+            game.reset();
+
+            //printState(game.state());
+
+            // 안전장치: 무한 루프 방지
+            const int MAX_TURNS = 100;
+            
+            for (t = 1; t <= MAX_TURNS; ++t) {
+                score = 0;
+                auto before = game.state();
+
+                StepResult r = game.Eval_agentStepOneTurn(a);
+                const State& after = game.state();
+
+                // 로그 출력
+                //cout << "\nTurn " << t << " Encounter=" << toString(r.encounterType)
+                //     << " Action=" << r.action << "\n";
+                //cout << "\n\n"; 
+                //printState(after);
+
+                if (after.isVictory) {
+                    //cout << "\n=== VICTORY! ===\n";
+                    score += VICTORY_REWARD; // 승리 보상
+                    score += additionalReward(after);
+                    //cout << "Final Score: " << score << "\n";
+                    if(score > maxScore)
+                    {
+                        maxScore = score;
+                    }    
+                    score_sum += score;
+                    victory_count++;
+                    break;
+                }
+                if (after.isGameOver) {
+                    //cout << "\n=== GAME OVER ===\n";
+                    score -= GAME_OVER_PENALTY; // 게임 오버 패널티
+                    score += additionalReward(after); // 게임 오버 시에도 추가 보상/패널티 반영
+                    //cout << "Final Score: " << score << "\n";
+                    break;
+                }
+            }
+        }
+        float avg_score = (float)score_sum / (float)AGENT_EVALUATION_ITERATIONS;
+        float win_rate = (float)victory_count / (float)AGENT_EVALUATION_ITERATIONS * 100;
+        cout << "Evaluation Complete\n" ;
+        cout << "Agent: " << filename << "\n";
+        cout << "Average Score: " << avg_score << "\n";
+        cout << "High Score: " << maxScore << "\n";
+        cout << "Win Rate: " << win_rate << "%\n\n";
+        //버퍼 복구
+        std::cout.rdbuf(oldCoutBuf);  
     }
     cout << "\n=== Run End ===\n";
     

@@ -42,6 +42,8 @@ static const int BATTLE_ENCOUNTER_PROBABILITY = 3; // 배틀 인카운터 상대
 static const int SHOP_ENCOUNTER_PROBABILITY = 2; // 상점 인카운터 상대적 비율
 static const int EVENT_ENCOUNTER_PROBABILITY = 4; // 반란 인카운터 상대적 비율 
 
+static const int AGENT_EVALUATION_ITERATIONS = 1000000; // 에이전트 테스트 돌릴 때 몇 번 돌릴 건지
+
 // ------------ Game State  ------------
 struct State {
     int hp = 100;

@@ -1,0 +1,108 @@
+
+===== NEW RUN =====
+1000000 runs completed
+2000000 runs completed
+3000000 runs completed
+4000000 runs completed
+5000000 runs completed
+6000000 runs completed
+7000000 runs completed
+8000000 runs completed
+9000000 runs completed
+10000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_0.txt
+Average Score: 0.0077938
+High Score: 70
+Win Rate: 0.01359%
+
+
+===== NEW RUN =====
+1000000 runs completed
+2000000 runs completed
+3000000 runs completed
+4000000 runs completed
+5000000 runs completed
+6000000 runs completed
+7000000 runs completed
+8000000 runs completed
+9000000 runs completed
+10000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_20000000.txt
+Average Score: 48.964
+High Score: 84
+Win Rate: 76.2211%
+
+
+===== NEW RUN =====
+1000000 runs completed
+2000000 runs completed
+3000000 runs completed
+4000000 runs completed
+5000000 runs completed
+6000000 runs completed
+7000000 runs completed
+8000000 runs completed
+9000000 runs completed
+10000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_40000000.txt
+Average Score: 49.6991
+High Score: 85
+Win Rate: 77.0912%
+
+
+===== NEW RUN =====
+1000000 runs completed
+2000000 runs completed
+3000000 runs completed
+4000000 runs completed
+5000000 runs completed
+6000000 runs completed
+7000000 runs completed
+8000000 runs completed
+9000000 runs completed
+10000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_60000000.txt
+Average Score: 48.0913
+High Score: 85
+Win Rate: 75.4339%
+
+
+===== NEW RUN =====
+1000000 runs completed
+2000000 runs completed
+3000000 runs completed
+4000000 runs completed
+5000000 runs completed
+6000000 runs completed
+7000000 runs completed
+8000000 runs completed
+9000000 runs completed
+10000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_80000000.txt
+Average Score: 49.7883
+High Score: 83
+Win Rate: 76.9616%
+
+
+===== NEW RUN =====
+1000000 runs completed
+2000000 runs completed
+3000000 runs completed
+4000000 runs completed
+5000000 runs completed
+6000000 runs completed
+7000000 runs completed
+8000000 runs completed
+9000000 runs completed
+10000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_100000000.txt
+Average Score: 48.7354
+High Score: 85
+Win Rate: 75.8995%
+

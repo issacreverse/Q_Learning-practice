@@ -1,0 +1,177 @@
+
+===== NEW RUN =====
+State: HP=100 Scrap=30 Power=25 Fuel=10 Bomb=1 Stage=1 Victory=false GameOver=false
+
+=== Turn: 1 ===
+=== Encounter: Event ===
+
+Agent chooses action: Search
+Good outcome: Scrap +10
+
+
+State: HP=100 Scrap=39 Power=25 Fuel=9 Bomb=1 Stage=2 Victory=false GameOver=false
+
+=== Turn: 2 ===
+=== Encounter: Event ===
+
+Agent chooses action: Search
+Good outcome: Scrap +10
+
+
+State: HP=100 Scrap=48 Power=25 Fuel=8 Bomb=1 Stage=3 Victory=false GameOver=false
+
+=== Turn: 3 ===
+=== Encounter: Event ===
+
+Agent chooses action: Search
+Good outcome: Scrap +10
+
+
+State: HP=100 Scrap=57 Power=25 Fuel=7 Bomb=1 Stage=4 Victory=false GameOver=false
+
+=== Turn: 4 ===
+=== Encounter: Event ===
+
+Agent chooses action: Search
+Good outcome: Power +3
+
+
+State: HP=100 Scrap=56 Power=28 Fuel=6 Bomb=1 Stage=5 Victory=false GameOver=false
+
+=== Turn: 5 ===
+=== Encounter: Event ===
+
+Agent chooses action: Search
+Bad outcome: HP -10
+
+
+State: HP=90 Scrap=55 Power=28 Fuel=5 Bomb=1 Stage=6 Victory=false GameOver=false
+
+=== Turn: 6 ===
+=== Encounter: Battle ===
+
+Agent chooses action: Fight
+Minor Victory: Scrap +12, HP -2
+
+
+State: HP=88 Scrap=66 Power=28 Fuel=4 Bomb=1 Stage=7 Victory=false GameOver=false
+
+=== Turn: 7 ===
+=== Encounter: Event ===
+
+Agent chooses action: Search
+Good outcome: Fuel +4
+
+
+State: HP=88 Scrap=65 Power=28 Fuel=7 Bomb=1 Stage=8 Victory=false GameOver=false
+
+=== Turn: 8 ===
+=== Encounter: Battle ===
+
+Agent chooses action: Fight
+Minor Victory: Scrap +12, HP -5
+
+
+State: HP=83 Scrap=76 Power=28 Fuel=6 Bomb=1 Stage=9 Victory=false GameOver=false
+
+=== Turn: 9 ===
+=== Encounter: Battle ===
+
+Agent chooses action: Fight
+Minor Victory: Scrap +13, HP -5
+
+
+State: HP=78 Scrap=88 Power=28 Fuel=5 Bomb=1 Stage=10 Victory=false GameOver=false
+
+=== Turn: 10 ===
+=== Encounter: Battle ===
+
+Agent chooses action: Fight
+Minor Victory: Scrap +13, HP -8
+
+
+State: HP=70 Scrap=100 Power=28 Fuel=4 Bomb=1 Stage=11 Victory=false GameOver=false
+
+=== Turn: 11 ===
+=== Encounter: Battle ===
+
+Agent chooses action: Fight
+Minor Victory: Scrap +13, HP -8
+
+
+State: HP=62 Scrap=112 Power=28 Fuel=3 Bomb=1 Stage=12 Victory=false GameOver=false
+
+=== Turn: 12 ===
+=== Encounter: Battle ===
+
+Agent chooses action: Fight
+Minor Victory: Scrap +14, HP -7
+
+
+State: HP=55 Scrap=125 Power=28 Fuel=2 Bomb=1 Stage=13 Victory=false GameOver=false
+
+=== Turn: 13 ===
+=== Encounter: Shop ===
+
+Agent chooses action: Repair(10 scrap -> 20 hp)
+Repaired: Scrap -10, HP +20
+
+
+State: HP=75 Scrap=114 Power=28 Fuel=1 Bomb=1 Stage=14 Victory=false GameOver=false
+
+=== Turn: 14 ===
+=== Encounter: Event ===
+
+Agent chooses action: Search
+Good outcome: Scrap +14
+
+
+State: HP=75 Scrap=127 Power=28 Fuel=0 Bomb=1 Stage=15 Victory=false GameOver=false
+
+=== Turn: 15 ===
+=== Encounter: Rebelion ===
+
+Agent chooses action: Fight
+Defeat: HP -15
+
+
+State: HP=60 Scrap=126 Power=28 Fuel=0 Bomb=1 Stage=16 Victory=false GameOver=false
+
+=== Turn: 16 ===
+=== Encounter: Rebelion ===
+
+Agent chooses action: Fight
+Defeat: HP -15
+
+
+State: HP=45 Scrap=125 Power=28 Fuel=0 Bomb=1 Stage=17 Victory=false GameOver=false
+
+=== Turn: 17 ===
+=== Encounter: Rebelion ===
+
+Agent chooses action: Fight
+Defeat: HP -15
+
+
+State: HP=30 Scrap=124 Power=28 Fuel=0 Bomb=1 Stage=18 Victory=false GameOver=false
+
+=== Turn: 18 ===
+=== Encounter: Rebelion ===
+
+Agent chooses action: Fight
+Defeat: HP -15
+
+
+State: HP=15 Scrap=123 Power=28 Fuel=0 Bomb=1 Stage=19 Victory=false GameOver=false
+
+=== Turn: 19 ===
+=== Encounter: Rebelion ===
+
+Agent chooses action: Fight
+Defeat: HP -15
+
+
+State: HP=0 Scrap=122 Power=28 Fuel=0 Bomb=1 Stage=19 Victory=false GameOver=true
+
+=== GAME OVER ===
+Final Score: -19
