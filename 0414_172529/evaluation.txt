@@ -1,0 +1,36 @@
+
+===== NEW RUN =====
+100000 runs completed
+200000 runs completed
+300000 runs completed
+400000 runs completed
+500000 runs completed
+600000 runs completed
+700000 runs completed
+800000 runs completed
+900000 runs completed
+1000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_20000.txt
+Average Score: 22.8823
+High Score: 83
+Win Rate: 42.5773%
+
+
+===== NEW RUN =====
+100000 runs completed
+200000 runs completed
+300000 runs completed
+400000 runs completed
+500000 runs completed
+600000 runs completed
+700000 runs completed
+800000 runs completed
+900000 runs completed
+1000000 runs completed
+Evaluation Complete
+Agent: qtable_checkpoint_40000.txt
+Average Score: 31.0955
+High Score: 84
+Win Rate: 57.6965%
+

@@ -355,8 +355,8 @@ while(true)
         //체크포인트마다 Q-table 저장
         //반복 100번 완료마다 로그 출력
 
-        int iterations = 1000;
-        int checkpointInterval = 500;
+        long long iterations = 1000LL;
+        long long checkpointInterval = 500LL;
         int gameOverCount = 0;
 
         cout << "Enter number of training iterations: ";
@@ -375,7 +375,7 @@ while(true)
 
         std::filesystem::create_directory(buf);
         
-        for(int i=0; i<iterations+1; i++)
+        for(long long i=0; i<iterations+1; i++)
         {
             
             const Encounter * lastEncounterType; // 마지막으로 만난 인카운터 타입 저장
@@ -456,7 +456,7 @@ while(true)
         score = 0;
         string dirname;
         string filename;
-        int iteration;
+        long long iteration;
         //select Q-table file
         while (true)
         {
@@ -557,7 +557,7 @@ while(true)
         
         string dirname;
         string filename;
-        int iteration;
+        long long iteration;
         //select Q-table file
         while (true)
         {
